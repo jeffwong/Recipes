@@ -1,0 +1,11 @@
+\documentclass{article}
+
+\title{The R Cookbook}
+\author{Jeffrey Wong}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\end{document}
