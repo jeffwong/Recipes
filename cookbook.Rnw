@@ -4,8 +4,616 @@
 \author{Jeffrey Wong}
 \date{\today}
 
+\setcounter{tocdepth}{3}
+
 \begin{document}
 
 \maketitle
+
+\tableofcontents
+
+\newpage
+
+\section{When to Use R?}
+
+R is the go-to language for statisticians; it's free, open source, contains
+a lot of statistics functions and is rapidly being developed.  The R community
+has generated thousands of packages that serve as add-ons; the rising popularity
+in statistical learning has also accelerated growth in the R community.
+While MATLAB provides a toolbox of matrix algebra and other types of analysis
+derived from matrix algebra, R provides extensive services in probability,
+a statistician's best friend.  Going beyond MATLAB, R can operate on both
+categorical and numerical data, making R a natural tool for social scientists
+while MATLAB is the dominant tool for engineers and physical scientists.
+Since R is easily distributable, it is popular both in the classroom and in industry.
+
+Anything you can do in MATLAB, you can do in R.  Anything you can do in scikits
+you can do in R.  However, that does not mean R should be a dominant language.
+R has one of the steepest learning curves, mainly because of its poor documentation.
+Also, R is not a formal programming language, so it lacks the ability to operate
+in production environments.  For example, error handling is no where near as elegant
+as in standard programming languages, such as Java and Python.  R has developed
+a culture of being only used in a development environment - to experiment with.
+For most statistical analysis, this is enough; if you are performing one study
+R might very well be your best bet.  If you are a data company however, you might
+use R to explore data but might write your own functions in a traditional production
+language like Java.
+
+In summary, R has all the tools that a statistician would ever need.  However,
+since R is not backed by any company and is only developed by a pool of volunteers,
+it has not established a culture of production level code.  If you are just looking
+to gain insight into your own data, R is the best, but if you are building an analytics
+service to understand other people's data, you should consider another language.
+
+My own style is to use R for data exploration.  If speed is necessary, I will
+switch to scikits or MATLAB.  For production, I either use Java libraries such as
+Weka or Mahout, or Python's numpy \& scipy libraries.
+
+\section{The Basic Operations}
+
+\subsection{Data Structures}
+
+There are three basic data structures in R that everyone needs to know.
+
+\begin{itemize}
+    \item Vector - a 1D array.  The data types in a vector must all be the same
+    \item List - R's most generic container.  List holds elements that are not
+        necessarily the same data type
+    \item Matrix - a data structure with standard matrix operations.  Can contain
+        numeric data only
+    \item Data Frame - a 2D table that can contain both numeric and categorical
+        data
+\end{itemize}
+
+A vector is created by concatenating elements together
+
+<<echo = T>>=
+x = c(1,2,3,4,5)
+x[1]
+x[5]
+
+z = c("HELLO", "WORLD")
+z
+@
+
+A list can contain any amount of named, or unnamed components.  The
+components can be any data structure, even another list.  To access
+the components of a list, we use the \textit{\$} operator; in most programming
+languages, the "." is used
+
+<<echo = T>>=
+x = list(x = c(1,2,3,4,5),
+         y = c(6,7,8,9,10),
+         z = c("HELLO", "WORLD"),
+         list("HOW ARE", "YOU?"))
+x$x
+x$y
+x$z
+x[[1]]
+x[[2]]
+x[[3]]
+x[[4]]
+@
+
+Data frames are really a list of vectors.  You can even access
+elements of a data frame the same way you access a list, through
+the \textit{\$} operator!
+
+<<echo = T>>=
+x = data.frame(variable1 = c(1,2,3,4,5),
+               variable2 = c(6,7,8,9,10))
+x
+x$variable1
+@
+
+One useful way to generate random data for your algorithms is to use
+the \textit{rnorm} function.  \textit{rnorm(n)}, without any other arguments
+will generate $n$ random $N(0,1)$ variables.  
+
+<<echo = T>>=
+randomData = rnorm(100)
+x = matrix(randomData, nrow = 10, ncol = 10)
+x
+@
+
+The function \textit{matrix} creates a 10 by 10 matrix and fills it with
+\textit{randomData}.  By default, it takes the elements from the 1D vector
+and fills the matrix by columns, that is the first 10 elements of
+\textit{randomData} form the first column of $x$, then the next 10 elements
+form the second column etc.  To fill it by row, we can use the operational
+parameter \textit{byrow}
+
+<<echo = T>>=
+x = matrix(randomData, nrow = 10, ncol = 10, byrow = TRUE)
+x
+@
+
+\section{Getting Data into R}
+
+R reads data that is in a table format.  This includes any delimited file type like
+csv, and tsv.  R also handles spreadsheet formats from excel, as well as SAS data files.
+The most common function you will use is \textit{read.csv}, which is a bit misleading
+because it can handle any delimited file type, not just csv.
+
+In this cookbook, I have included a dataset from Kaggle on electric loads.  In
+this dataset, there are 20 geographic zones, with measurements of electric loads
+taken every hour.  If your current working directory is inside this project folder,
+then you can issue this command to read the data.
+
+<<echo = T>>=
+data = read.csv("data/Load_history.csv", header=T)
+@
+
+You can even open data files that are hosted online
+
+<<echo = T>>=
+#data = read.csv("https://raw.github.com/", header=T)
+@
+
+\subsection{Accessing Data}
+
+Most basic statistics operations can be performed with just one command in R.
+
+Now that we have data, we can take a peek at what it looks like.  Use \textit{head}
+and \textit{tail} to peek at a few rows.
+
+<<echo = T>>=
+head(data)
+tail(data)
+@
+
+Here you can see what data types you have, in this case all numerics.  Also, you can
+see that there is a lot of missing data at the bottom of the file.  
+
+To subset data by taking the first 10 rows
+
+<<echo = T>>=
+data[1:10,]
+@
+
+and the first 10 columns
+
+<<echo = T>>=
+first10 = data[,1:10]
+head(first10)
+@
+
+To see the names of the columns
+
+<<echo = T>>=
+names(data)
+@
+
+To select the year column by its name
+
+<<echo = T>>=
+head(data$year)
+@
+
+To find something in a vector, we can use the \textit{which} command.  The
+output of which tells us the location of an object within the vector.  In
+this example, we will look at the month column of the data frame, which
+on its own is a vector.
+
+<<echo = T>>=
+head(which(data$month == 1))
+@
+
+To select the rows of the data frame that belong to January, we can apply
+\textit{which} to the subsetting of rows
+
+<<echo = T>>=
+january = data[which(data$month == 1),]
+head(january)
+@
+
+To see the data structures behind the object \textit{data}.
+
+<<echo = T>>=
+str(data)
+@
+
+That's interesting, what are all these factors?  Factors are a data
+type that R uses to represent categorical variables.  Here, \textit{h1}
+is a factor with 25,095 levels, meaning \textit{h1} is a category and
+it can fall under one of 25,095 different values.
+
+\section{Data Munging by Example}
+\textbf{Keywords}: data manipulation, cleaning
+
+We know that energy usage should not be a categorical variable.  Why did
+R detect them as such?  In this particular file, it is because of the ","
+in the numerics.  Spreadsheet programs might display ","'s in their UI, but
+typically there is no literal "," in the number.  When the text file was
+created, the "," was outputed and is now confusing R.  
+
+Let's use some regexes to strip the comma out.  First, I'll introduce
+a set of functions that are handy to have when manipulating data structures.
+Then, we will move into manipulating the text of this data file.
+
+\subsection{The \textit{apply} Family}
+\textbf{Keyword}: map, apply
+
+In functional programming, there is always a function called \textit{map},
+which applies a function to each element of an array.  Say we had the array
+x = [1,2,3,4,5] and defined a function $f(x) = x^2$.  Then x.map(f)
+would output [1, 4, 9, 16, 25].  In R, there is a family of such functions
+called the \textit{apply} family.  The R function \textit{sapply} operates
+on R vectors and does exactly what map does.
+
+<<echo = T>>=
+x = c(1,2,3,4,5)
+sapply(x, function(i) { return (i^2) } )
+@
+
+Here, the parameter \textit{i} that gets passed in to the function that we
+define is an element from $x$.
+
+The function \textit{apply} goes across the rows (or columns) of either a
+data frame or matrix and applies a function.  Say we wanted to double
+every row of a matrix $x$
+
+<<echo = T>>=
+x = matrix(rnorm(100), 10, 10)
+apply(x, 1, function(i) { return (2*i) } )
+@
+
+If we want to double the columns
+
+<<echo = T>>=
+x = matrix(rnorm(100), 10, 10)
+apply(x, 2, function(j) { return (2*j) } )
+@
+
+\subsection{String manipulation}
+\textbf{Keywords}: regex
+
+String manipulation is best done using Hadley Wickham's package \textit{stringr}.
+You can install and load additional R packages by
+
+<<echo = T>>=
+install.packages('stringr', repos = "http://cran.cnr.Berkeley.edu")
+require(stringr)
+@
+
+The function we would like to use is \textbf{str\_replace}.  In this use case, we want
+to replace all commas with empty strings.  Given a string with commas x, we want
+to run the function
+
+\begin{verbatim}
+str_replace(x, ",", "")
+\end{verbatim}
+
+Since columns 5 through 28 all have the bad comma, we can call apply with the
+str\_replace function.
+
+<<echo = T>>=
+nocommas = apply(data[,5:28], 2, function(x) { str_replace_all(x, ",", "") } )
+str(nocommas)
+@
+
+Note that the output of that apply gave us a data frame of all strings.
+To convert a string to a number, we can use the \textbf{as.numeric} function.
+Again, we can apply over all columns of \textit{nocommas}
+
+<<echo = T>>=
+loads = apply(nocommas, 2, as.numeric)
+str(loads)
+head(loads)
+data[,5:28] = loads
+@
+
+\subsection{Reshaping - Handling Panel Data}
+\textbf{Keywords:} dates, time series, panel data, reshape, melt
+
+This dataset has components of time - year, month, and day, but they are all
+separated as 3 different columns.  There is no actual date object here.
+We can create one by looping over the rows and concatenating year, month, and day
+into one date string; then, we will parse that string into a date object.  In R,
+concatenation is done using the \textbf{paste} function.  \textbf{paste} takes any
+amount of arguments, and concatenates them together with some user provided
+seperator, i.e.
+
+<<echo = T>>=
+paste("HELLO", "WORLD", sep=" ")
+@
+
+If the strings to be concatenated are stored inside a vector, then we pass
+in the parameter \textit{collapse} to collapse the container into one single
+string
+
+<<echo = T>>=
+words = c("HELLO", "WORLD")
+paste(words, collapse = " ")
+@
+
+Looping over rows lends itself to the apply function again.  Each row
+will be considered a vector, and to construct a date string we will
+want to extract elements 2, 3, and 4 from the row
+
+<<echo = T>>=
+dates = apply(data, 1, function(i) {
+    paste(i[2:4], collapse='-')
+})
+head(dates)
+@
+
+Alternatively, paste is already vectorized, and we can call the more
+succinct function
+
+<<echo = T>>=
+dates = paste(data$year, data$month, data$day, sep = "-")
+head(dates)
+@
+
+To parse into date objects, we can use another package by Mr. Wickham,
+\textbf{lubridate}.
+
+<<echo = T>>=
+install.packages('lubridate', repos="http://cran.cnr.Berkeley.edu")
+require('lubridate')
+@
+
+We can parse dates in the year-month-day format using \textit{ymd}.  After parsing
+these date strings, we will insert the date objects into the data frame
+
+<<echo = T>>=
+dates = ymd(dates)
+data$date = dates
+head(data)
+@
+
+Note that we used the \textit{\$} operator to assign a non existing column, date,
+to the recently created \textit{dates} vector.
+
+This dataset is a great example of panel data.  We observe 20 geographic zones
+over a period of 4 years.  The format of this dataset has identifying variables
+zone\_id, and date.  The variable that we are observing is electric load.
+Each row has 24 measurements of this variable.  This format, where a row stores
+multiple measurements on one variable is called the wide format.  Sometimes,
+it is more helpful for a row to only contain one measurement per variable observed,
+called the long format.  For example, how would we plot the data in the wide format?
+How would a plotting function know that the data moves from left to right for hours,
+and then from top to bottom for different dates?  It would be nicer if the
+entire time series was captured, in order, in one column.  The process of
+converting from wide format to long format is called \textbf{reshaping}.
+The package \textit{reshape2} makes reshaping very easy, it just asks us
+to specify which variables are measurements.
+
+<<echo = T>>=
+install.packages('reshape2', repos="http://cran.cnr.Berkeley.edu")
+require('reshape2')
+
+data.long = melt(data, measure.vars = 5:28)
+head(data.long)
+@
+
+The long format will be very helpful in data visualization later!
+
+\section{Statistics Functions}
+
+Let's normalize the numeric parts of this data frame, contained in columns 5
+through 28.  We will do so by using the command \textit{scale}, and redefining
+columns 5 through 28 using the output.  Scale will remove the means of the
+columns and divide by their standard deviations
+
+<<echo = T>>=
+data[,5:28] = scale(data[,5:28])
+@
+
+How does \textbf{scale} work behind the scenes?  Note that the \textit{scale}
+function can be replicated using the \textit{apply}  function.  Since scale
+goes across columns, removes the mean and divides by the standard deviation,
+it can be written like this
+
+<<echo = T>>=
+apply(x, 2, function(j) {
+    demean = j - mean(j)
+    return (demean / sd(j))
+})
+@
+
+\section{Data Visualization}
+
+\textbf{ggplot} is the one and only way to go for data visualization in R.
+This visualization package is envied by many other data analysis software
+and by itself draws a lot of users to R.  The graphs here are beautiful,
+easy to construct and very flexible.
+
+All ggplot2 commands operate on data frames, so unlike plot(...) you
+cannot pass in a vector.  Fortunately, there are functions like reshape
+and melt that can manipulate data frames into the proper ggplot input. 
+ggplot commands take the form ggplot(data frame, aes(...)) + geom\_something.
+aes(...) is the aesthetics of the graph, which unintuitively means
+how the data points are defined: what variables make the x and y coordinates,
+how is the data grouped, how should the points be colored/filled/shaded.  The
+second component, geom\_something defines how the data is charted, whether through
+a line graph, a bar graph, etc.  For beginners who do not know the different
+charting forms, there's always qplot which tries to infer the approrpriate
+charting type based on the class of data in the data frame.
+Below are some recipes for common graphs.
+
+\subsection{Histograms and PDFs}
+
+Let's create a dataframe where one column is numeric, and the second column
+represents a group.  Take a look at how qplot handles the data
+
+<<echo=T>>=
+install.packages('ggplot2', repos="http://cran.cnr.Berkeley.edu")
+require(ggplot2)
+@
+
+<<fig = T>>=
+df = data.frame(value = rnorm(1000), category = rep(factor(c("A", "B")), 500))
+qplot(df$value, binwidth=.5)
+@
+
+More specifically, we can control the graphing using \textbf{geom\_histogram}
+
+<<fig=T>>=
+ggplot(df, aes(x=value)) + geom_histogram(binwidth=.5, colour="black", fill="white")
+@
+
+To draw a probability density function (pdf) over the histogram
+
+<<fig=T>>=
+ggplot(df, aes(x=value)) + 
+geom_histogram(aes(y=..density..),
+               binwidth=.5,
+               colour="black", fill="white") +
+geom_density(alpha=.2, fill="#FF6666") +
+geom_vline(aes(xintercept=mean(value, na.rm=T)),
+           color="red", linetype="dashed", size=1)
+@
+
+\subsection{Line Graphs, Smoothing}
+
+Say we have a time series and would like to plot it in ggplot.
+We can plot it as a scatterplot, then draw a straight line through it
+using a linear regression
+
+<<fig = T, echo = T>>=
+x = rnorm(100)
+y = 1 + 3*x + x^2
+df = data.frame(y = y, x = x)
+
+ggplot(df, aes(x=x,y=y)) + 
+geom_point(shape=1) +
+geom_smooth(method=lm, se=T)
+@
+
+Alternativley, we could use LOESS to fit the data points,
+which fits a polynomial curve instead of a straight line.
+
+<<fig = T, echo = T>>=
+ggplot(df, aes(x=x,y=y)) + 
+geom_point(shape=1) +
+geom_smooth()
+@
+
+\subsection{Faceting the Electric Load Data}
+
+Faceting is a way to see partitions of data side by side.  Let's refer back
+to the Kaggle Load Data.  Say we would like to do a comparison across the
+weekdays Monday vs Tuesday vs Wednesday, etc.  ggplot likes working with 
+data in the long format, so we will refer to the dataset \textit{data.long}
+we created earlier.
+
+<<echo = T>>=
+head(data.long)
+@
+
+First, we need more data munging.  We know that date and variable together
+form a datetime.  Again, let us create a proper datetime object.
+
+<<echo = T>>=
+hour = as.numeric(str_extract(data.long$variable, "\\d+"))
+datetime = data.long$date + 60 * 60 * hour
+data.long$datetime = datetime
+
+head(data.long)
+str(data.long)
+@
+
+One thing we should make sure is that zone\_id is recognized as a categorical
+variable.  While it takes on values that are pure numbers, it will be helpful
+for us to define it as a categorical variable so we can take advantage of groups
+in our plots
+
+<<echo = T>>=
+data.long$zone_id = as.factor(data.long$zone_id)
+head(data.long)
+str(data.long)
+@
+
+One way to see many partitions of a dataset in a graph is to group the
+data points and color them according to their partitions.  Alternatively, we
+could also generate multiple graphs and put them side by side, faceting them.
+For this example we will plot both.
+
+First, we define the aes by plotting datetime on the x-axis, and value on the
+y-axis.  The color of the lines will be determined by zone\_id
+
+<<echo = T, fig = T>>=
+ggplot(data.long, aes(x = datetime, y = value, color = zone_id)) +
+geom_line()
+@
+
+To split this one graph into a grid of smaller graphs for side by side
+comparison, we add facet\_wrap.  We will facet on zone\_id so that each
+zone has a separate graph.
+
+<<echo = T, fig = T>>=
+ggplot(data.long, aes(x = datetime, y = value, color = zone_id)) +
+geom_line() + facet_wrap(~zone_id, ncol = 5)
+@
+
+These graphs don't tell us much because the line graphs have too many points.
+Instead, we could take a subset of this data by looking at the time period
+January 2004 only
+
+<<echo = T, fig = T>>=
+ggplot(subset(data.long, (year == 2004 & month == 1)),
+       aes(x = datetime, y = value, color = zone_id)) +
+geom_line() + facet_wrap(~zone_id, ncol = 5)
+@
+
+\section{Data Modeling}
+
+Models are mathematical constructs that are used to explain data.  What
+does it mean to ``explain'' data?  In social sciences where statistics is most
+often used, data is never consistent.  It always has variation, whether
+systematic variation caused by changes in a controlled environment or by unknown
+randomness.  Models try to identify these variations, and explain why they happen.
+Within this field of models there are two strong schools of thought: 
+\textbf{predictive models} and parsimonious, \textbf{data models}.
+
+Predictive models do their utmost best to predict new data points.  These models
+identify variation, but they do not necessarily come up with intuitive
+ways to explain the variation.  A predictive model can be incredibly complex,
+but will still be popular if it makes good predictions.  This school of thought
+is popular in machine learning.
+
+Data models will not be as good in prediction as predictive models, but they
+aim to be better at explaining variance.  These models are designed to be simple
+and parsimonious.  They utilize only a few variables and the model formula
+has a simple form.  Usually data models are appropriate when we need to make
+\textbf{inferences}, that is we need to understand to what degree each variable
+impacts the outcome, which variables are significant, what the covariances are...
+
+\subsection{Regression}
+
+Performing a linear regression is done with the lm command.  Say we have
+data that, unknown to us, is generated using the formula $y = 1 + 3x + x^2$
+If we wanted to fit a linear model to data points x and y, we could come
+up with the fit
+
+<<echo = T>>=
+x = rnorm(100)
+y = 1 + 3*x + x^2 + rnorm(100)
+
+y.lm = lm(y ~ x)
+summary(y.lm)
+@
+
+\subsection{Generalized Linear Models}
+
+\subsection{Neural Networks}
+
+\subsection{CART: Classification and Regression Tree}
+
+\section{Advanced Data Analysis}
+
+\subsection{Penalized Models}
+
+\subsection{Boosting}
+
+\section{Open Source Development}
+
+\subsection{devtools}
+
+\subsection{Roxygen}
+
+\subsection{Non-R Source Code}
 
 \end{document}

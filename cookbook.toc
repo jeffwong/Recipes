@@ -1,0 +1,26 @@
+\contentsline {section}{\numberline {1}When to Use R?}{2}
+\contentsline {section}{\numberline {2}The Basic Operations}{2}
+\contentsline {subsection}{\numberline {2.1}Data Structures}{2}
+\contentsline {section}{\numberline {3}Getting Data into R}{5}
+\contentsline {subsection}{\numberline {3.1}Accessing Data}{6}
+\contentsline {section}{\numberline {4}Data Munging by Example}{10}
+\contentsline {subsection}{\numberline {4.1}The \textit {apply} Family}{10}
+\contentsline {subsection}{\numberline {4.2}String manipulation}{12}
+\contentsline {subsection}{\numberline {4.3}Reshaping - Handling Panel Data}{13}
+\contentsline {section}{\numberline {5}Statistics Functions}{15}
+\contentsline {section}{\numberline {6}Data Visualization}{16}
+\contentsline {subsection}{\numberline {6.1}Histograms and PDFs}{17}
+\contentsline {subsection}{\numberline {6.2}Line Graphs, Smoothing}{19}
+\contentsline {subsection}{\numberline {6.3}Faceting the Electric Load Data}{21}
+\contentsline {section}{\numberline {7}Data Modeling}{25}
+\contentsline {subsection}{\numberline {7.1}Regression}{26}
+\contentsline {subsection}{\numberline {7.2}Generalized Linear Models}{26}
+\contentsline {subsection}{\numberline {7.3}Neural Networks}{26}
+\contentsline {subsection}{\numberline {7.4}CART: Classification and Regression Tree}{26}
+\contentsline {section}{\numberline {8}Advanced Data Analysis}{26}
+\contentsline {subsection}{\numberline {8.1}Penalized Models}{26}
+\contentsline {subsection}{\numberline {8.2}Boosting}{26}
+\contentsline {section}{\numberline {9}Open Source Development}{26}
+\contentsline {subsection}{\numberline {9.1}devtools}{26}
+\contentsline {subsection}{\numberline {9.2}Roxygen}{26}
+\contentsline {subsection}{\numberline {9.3}Non-R Source Code}{26}
